@@ -53,15 +53,15 @@ while(<CONFIGURATION>){
     my ($key, $val) = split("\t",$_,2);
     #parse ini file
     if($key eq 'INIFILE') {
-	$opt{$key} = $val;
-	open (INI, "<$val") or die "Couldn't open .ini file $val\n";
-	while(<INI>){
-	    chomp;
-	    next if m/^#/ or ! $_;
-	    my ($key, $val) = split("\t",$_,2);
-	    $opt{$key} = $val;
-	}
-	close INI;
+        $opt{$key} = $val;
+	      open (INI, "<$val") or die "Couldn't open .ini file $val\n";
+	      while(<INI>){
+            chomp;
+	          next if m/^#/ or ! $_;
+	          my ($key, $val) = split("\t",$_,2);
+	          $opt{$key} = $val;
+	      }
+	      close INI;
     #parse other config attributes
     } elsif($key eq 'FASTQ' || $key eq 'BAM') {
         $opt{$key}->{$val} = 1;
@@ -109,46 +109,46 @@ if( $opt{FASTQ} ){
 ### Post mapping
 if(! $opt{VCF} ){
     if($opt{POSTSTATS} eq "yes"){
-	print "\n###SCHEDULING POSTSTATS###\n";
-	my $postStatsJob = illumina_poststats::runPostStats(\%opt);
-	$opt{RUNNING_JOBS}->{'postStats'} = $postStatsJob;
+      print "\n###SCHEDULING POSTSTATS###\n";
+      my $postStatsJob = illumina_poststats::runPostStats(\%opt);
+      $opt{RUNNING_JOBS}->{'postStats'} = $postStatsJob;
     }
 
     if($opt{INDELREALIGNMENT} eq "yes"){
-	print "\n###SCHEDULING INDELREALIGNMENT###\n";
-	$opt_ref = illumina_realign::runRealignment(\%opt);
-	%opt = %$opt_ref;
+      print "\n###SCHEDULING INDELREALIGNMENT###\n";
+      $opt_ref = illumina_realign::runRealignment(\%opt);
+      %opt = %$opt_ref;
     }
 
     if($opt{BASEQUALITYRECAL} eq "yes"){
-	print "\n###SCHEDULING BASERECALIBRATION###\n";
-	$opt_ref = illumina_baseRecal::runBaseRecalibration(\%opt);
-	%opt = %$opt_ref;
+	      print "\n###SCHEDULING BASERECALIBRATION###\n";
+	      $opt_ref = illumina_baseRecal::runBaseRecalibration(\%opt);
+	      %opt = %$opt_ref;
     }
 
-### Variant Caller
+    ### Variant Caller
     ### Somatic variant callers
     if($opt{SOMATIC_VARIANTS} eq "yes"){
-	print "\n###SCHEDULING SOMATIC VARIANT CALLERS####\n";
-	$opt_ref = illumina_somaticVariants::parseSamples(\%opt);
-	%opt = %$opt_ref;
-	my $somVar_jobs = illumina_somaticVariants::runSomaticVariantCallers(\%opt);
-	$opt{RUNNING_JOBS}->{'somVar'} = $somVar_jobs;
+	      print "\n###SCHEDULING SOMATIC VARIANT CALLERS####\n";
+	      $opt_ref = illumina_somaticVariants::parseSamples(\%opt);
+	      %opt = %$opt_ref;
+	      my $somVar_jobs = illumina_somaticVariants::runSomaticVariantCallers(\%opt);
+	      $opt{RUNNING_JOBS}->{'somVar'} = $somVar_jobs;
     }
     if($opt{COPY_NUMBER} eq "yes"){
-	print "\n###SCHEDULING COPY NUMBER TOOLS####\n";
-	if($opt{CNV_MODE} eq "sample_control"){
-	    $opt_ref = illumina_copyNumber::parseSamples(\%opt);
-	    %opt = %$opt_ref;
-	}
-	my $cnv_jobs = illumina_copyNumber::runCopyNumberTools(\%opt);
-	$opt{RUNNING_JOBS}->{'CNV'} = $cnv_jobs;
+	      print "\n###SCHEDULING COPY NUMBER TOOLS####\n";
+	      if($opt{CNV_MODE} eq "sample_control"){
+	          $opt_ref = illumina_copyNumber::parseSamples(\%opt);
+	          %opt = %$opt_ref;
+	      }
+	      my $cnv_jobs = illumina_copyNumber::runCopyNumberTools(\%opt);
+	      $opt{RUNNING_JOBS}->{'CNV'} = $cnv_jobs;
     }
     ### GATK
     if($opt{VARIANT_CALLING} eq "yes"){
-	print "\n###SCHEDULING VARIANT CALLING####\n";
-	$opt_ref = illumina_calling::runVariantCalling(\%opt);
-	%opt = %$opt_ref;
+	      print "\n###SCHEDULING VARIANT CALLING####\n";
+	      $opt_ref = illumina_calling::runVariantCalling(\%opt);
+	      %opt = %$opt_ref;
     }
 
 } elsif ( $opt{VCF} ) {
@@ -161,9 +161,9 @@ if(! $opt{VCF} ){
 if($opt{FILTER_VARIANTS} eq "yes"){
     print "\n###SCHEDULING VARIANT FILTRATION####\n";
     my $FVJob = illumina_filterVariants::runFilterVariants(\%opt);
-    
+
     foreach my $sample (@{$opt{SAMPLES}}){
-	push (@{$opt{RUNNING_JOBS}->{$sample}} , $FVJob);
+	      push (@{$opt{RUNNING_JOBS}->{$sample}} , $FVJob);
     }
 }
 
@@ -171,9 +171,9 @@ if($opt{FILTER_VARIANTS} eq "yes"){
 if($opt{ANNOTATE_VARIANTS} eq "yes"){
     print "\n###SCHEDULING VARIANT ANNOTATION####\n";
     my $AVJob = illumina_annotateVariants::runAnnotateVariants(\%opt);
-    
+
     foreach my $sample (@{$opt{SAMPLES}}){
-	push (@{$opt{RUNNING_JOBS}->{$sample}} , $AVJob);
+	      push (@{$opt{RUNNING_JOBS}->{$sample}} , $AVJob);
     }
 }
 
@@ -213,7 +213,7 @@ sub getSamples{
 	    @{$opt{RUNNING_JOBS}->{$sampleName}} = ();
 	}
     }
-    
+
     @{$opt{SAMPLES}} = keys(%samples);
 }
 
@@ -357,8 +357,8 @@ sub checkConfig{
     }
     ## BASEQUALITYRECAL
     if($opt{BASEQUALITYRECAL} eq "yes"){
-	if(! $opt{BASERECALIBRATION_MASTERQUEUE}){ print "ERROR: No BASERECALIBRATION_QUEUE option found in config files.\n"; $checkFailed = 1; }
-	if(! $opt{BASERECALIBRATION_MASTERTHREADS}){ print "ERROR: No BASERECALIBRATION_THREADS option found in config files.\n"; $checkFailed = 1; }
+	if(! $opt{BASERECALIBRATION_MASTERQUEUE}){ print "ERROR: No BASERECALIBRATION_MASTERQUEUE option found in config files.\n"; $checkFailed = 1; }
+	if(! $opt{BASERECALIBRATION_MASTERTHREADS}){ print "ERROR: No BASERECALIBRATION_MASTERTHREADS option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{BASERECALIBRATION_QUEUE}){ print "ERROR: No BASERECALIBRATION_QUEUE option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{BASERECALIBRATION_THREADS}){ print "ERROR: No BASERECALIBRATION_THREADS option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{BASERECALIBRATION_MEM}){ print "ERROR: No BASERECALIBRATION_MEM option found in config files.\n"; $checkFailed = 1; }
@@ -374,11 +374,11 @@ sub checkConfig{
 	if(! $opt{CALLING_MASTERTHREADS}){ print "ERROR: No CALLING_MASTERTHREADS option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{CALLING_QUEUE}){ print "ERROR: No CALLING_QUEUE option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{CALLING_THREADS}){ print "ERROR: No CALLING_THREADS option found in config files.\n"; $checkFailed = 1; }
-	if(! $opt{CALLING_MEM}){ print "ERROR: No CALLING_QUEUE option found in config files.\n"; $checkFailed = 1; }
+	if(! $opt{CALLING_MEM}){ print "ERROR: No CALLING_MEM option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{CALLING_SCATTER}){ print "ERROR: No CALLING_SCATTER option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{CALLING_GVCF}){ print "ERROR: No CALLING_GVCF option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{CALLING_SCALA}){ print "ERROR: No CALLING_SCALA option found in config files.\n"; $checkFailed = 1; }
-	if($opt{CALLING_UGMODE}){ 
+	if($opt{CALLING_UGMODE}){
 	    if($opt{CALLING_UGMODE} ne "SNP" and $opt{CALLING_UGMODE} ne "INDEL" and $opt{CALLING_UGMODE} ne "BOTH"){ print "ERROR: UGMODE: $opt{CALLING_UGMODE} does Not exist use SNP, INDEL or BOTH\n"; $checkFailed = 1; }
 	}
 	if(! $opt{CALLING_STANDCALLCONF}){ print "ERROR: No CALLING_STANDCALLCONF option found in config files.\n"; $checkFailed = 1; }
@@ -390,10 +390,10 @@ sub checkConfig{
     ## FILTER_VARIANTS
     if($opt{FILTER_VARIANTS} eq "yes"){
 	if(! $opt{FILTER_MASTERQUEUE}){ print "ERROR: No FILTER_MASTERQUEUE option found in config files.\n"; $checkFailed = 1; }
-	if(! $opt{FILTER_MASTERTHREADS}){ print "ERROR: No FILTER_MASTERTHREADS option found in config files.\n"; $checkFailed = 1; }	
+	if(! $opt{FILTER_MASTERTHREADS}){ print "ERROR: No FILTER_MASTERTHREADS option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{FILTER_QUEUE}){ print "ERROR: No FILTER_QUEUE option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{FILTER_THREADS}){ print "ERROR: No FILTER_THREADS option found in config files.\n"; $checkFailed = 1; }
-	if(! $opt{FILTER_MEM}){ print "ERROR: No FILTER_QUEUE option found in config files.\n"; $checkFailed = 1; }
+	if(! $opt{FILTER_MEM}){ print "ERROR: No FILTER_MEM option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{FILTER_SCATTER}){ print "ERROR: No FILTER_SCATTER option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{FILTER_SCALA}){ print "ERROR: No FILTER_SCALA option found in config files.\n"; $checkFailed = 1; }
 	if(! $opt{FILTER_MODE}){ print "ERROR: No FILTER_MODE  option found in config files.\n"; $checkFailed = 1; }
@@ -529,7 +529,7 @@ sub checkConfig{
 	if(! $opt{VCFUTILS_THREADS}){ print "ERROR: No VCFUTILS_THREADS found in .ini file\n"; $checkFailed = 1; }
 	#if(! $opt{VCFUTILS_SCATTER}){ print "ERROR: No VCFUTILS_SCATTER found in .ini file\n"; $checkFailed = 1; }
 	if(! $opt{VCFUTILS_MEM}){ print "ERROR: No VCFUTILS_MEM found in .ini file\n"; $checkFailed = 1; }
-	
+
 	if(! $opt{VCFUTILS_KINSHIP}){ print "ERROR: No VCFUTILS_KINSHIP found in .ini file\n"; $checkFailed = 1; }
 	if ( $opt{VCFUTILS_KINSHIP} eq "yes" ) {
 	    if(! $opt{PLINK_PATH}){ print "ERROR: No PLINK_PATH found in .ini file\n"; $checkFailed = 1; }
@@ -540,7 +540,7 @@ sub checkConfig{
 	    if(! $opt{PED}){ print "ERROR: No PED found in .conf file\n"; $checkFailed = 1; }
 	}
     }
-    if ($checkFailed) { 
+    if ($checkFailed) {
 	print "One or more options not found in config files.";
 	die;
     }
